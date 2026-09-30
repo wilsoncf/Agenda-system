@@ -2,13 +2,12 @@
 
 /**
  * AppointmentCard — renders an appointment in the weekly grid.
- *
- * Implements keyboard accessibility, distinct selection styling,
- * status badges, and strict non-index identity.
+ 
  */
 
 import React from 'react';
 import type { Appointment, AppointmentStatus } from '@/domain/appointment';
+import { durationMinutes } from '@/lib/date/time-utils';
 import { cn } from '@/lib/utils';
 
 type AppointmentCardProps = {
@@ -16,6 +15,7 @@ type AppointmentCardProps = {
   readonly isSelected: boolean;
   readonly onSelect: (id: string) => void;
   readonly style?: React.CSSProperties;
+  readonly height?: number;
 };
 
 const STATUS_LABELS: Record<AppointmentStatus, string> = {
@@ -63,9 +63,21 @@ export function AppointmentCard({
   isSelected,
   onSelect,
   style,
+  height,
 }: AppointmentCardProps) {
   const statusConfig = STATUS_STYLES[appointment.status];
   const statusLabel = STATUS_LABELS[appointment.status];
+
+  const cardHeight =
+    height ??
+    (typeof style?.height === 'number'
+      ? style.height
+      : typeof style?.height === 'string'
+      ? parseFloat(style.height)
+      : (durationMinutes(appointment.startTime, appointment.endTime) ?? 60));
+
+  const isCompact = cardHeight < 30;
+  const isIntermediate = cardHeight >= 30 && cardHeight < 50;
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -91,34 +103,64 @@ export function AppointmentCard({
       onKeyDown={handleKeyDown}
       style={style}
       className={cn(
-        'absolute rounded-md border p-1.5 text-xs text-left cursor-pointer select-none overflow-hidden transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        'absolute rounded-md border text-xs text-left cursor-pointer select-none overflow-hidden transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        isCompact ? 'px-1.5 py-0.5' : isIntermediate ? 'px-1.5 py-1' : 'p-1.5',
         statusConfig.container,
         isSelected
           ? 'ring-2 ring-primary ring-offset-1 shadow-md z-20 font-medium'
           : 'hover:shadow-sm z-10'
       )}
     >
-      <div className="flex items-center justify-between gap-1 mb-0.5 leading-none">
-        <span className="font-mono text-[10px] opacity-80 whitespace-nowrap">
-          {appointment.startTime} – {appointment.endTime}
-        </span>
-        <span
-          className={cn(
-            'px-1 py-0.5 rounded text-[9px] font-medium leading-none whitespace-nowrap',
-            statusConfig.badge
+      {isCompact ? (
+        <div className="flex items-center justify-between gap-1 w-full min-w-0 h-full leading-none">
+          <span className="font-semibold truncate text-[11px] flex-1">
+            {appointment.title}
+          </span>
+          <span className="font-mono text-[9px] opacity-75 whitespace-nowrap shrink-0">
+            {appointment.startTime}
+          </span>
+        </div>
+      ) : isIntermediate ? (
+        <div className="flex flex-col justify-center h-full w-full min-w-0 overflow-hidden">
+          <div className="flex items-center justify-between gap-1 leading-none">
+            <span className="font-semibold truncate text-xs flex-1">
+              {appointment.title}
+            </span>
+            <span className="font-mono text-[10px] opacity-80 whitespace-nowrap shrink-0">
+              {appointment.startTime} – {appointment.endTime}
+            </span>
+          </div>
+          {cardHeight >= 40 && (
+            <div className="text-[10px] opacity-75 truncate leading-tight mt-0.5">
+              {appointment.professional}
+            </div>
           )}
-        >
-          {statusLabel}
-        </span>
-      </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center justify-between gap-1 mb-0.5 leading-none">
+            <span className="font-mono text-[10px] opacity-80 whitespace-nowrap">
+              {appointment.startTime} – {appointment.endTime}
+            </span>
+            <span
+              className={cn(
+                'px-1 py-0.5 rounded text-[9px] font-medium leading-none whitespace-nowrap',
+                statusConfig.badge
+              )}
+            >
+              {statusLabel}
+            </span>
+          </div>
 
-      <div className="font-semibold truncate leading-snug">
-        {appointment.title}
-      </div>
+          <div className="font-semibold truncate leading-snug">
+            {appointment.title}
+          </div>
 
-      <div className="text-[10px] opacity-75 truncate mt-0.5">
-        {appointment.professional}
-      </div>
+          <div className="text-[10px] opacity-75 truncate mt-0.5">
+            {appointment.professional}
+          </div>
+        </>
+      )}
     </div>
   );
 }

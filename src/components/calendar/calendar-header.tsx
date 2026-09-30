@@ -1,10 +1,5 @@
 'use client';
 
-/**
- * CalendarHeader — controls week navigation, displays week range and selection,
- * and provides entry points for CRUD operations (Novo, Editar, Excluir).
- */
-
 import React from 'react';
 import {
   ChevronLeft,

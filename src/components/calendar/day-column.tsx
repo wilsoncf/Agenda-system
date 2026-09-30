@@ -74,6 +74,7 @@ export function DayColumn({
             appointment={item.appointment}
             isSelected={isSelected}
             onSelect={onSelectAppointment}
+            height={item.placement.height}
             style={{
               top: `${item.placement.top}px`,
               height: `${item.placement.height}px`,

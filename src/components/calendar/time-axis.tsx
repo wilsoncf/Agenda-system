@@ -24,6 +24,7 @@ export function TimeAxis({ config = DEFAULT_CALENDAR_CONFIG }: TimeAxisProps) {
       aria-hidden="true"
     >
       {hours.map((hour, index) => {
+        const isFirst = index === 0;
         const isLast = index === hours.length - 1;
         const timeLabel = `${String(hour).padStart(2, '0')}:00`;
 
@@ -33,7 +34,11 @@ export function TimeAxis({ config = DEFAULT_CALENDAR_CONFIG }: TimeAxisProps) {
             style={{ height: isLast ? 0 : `${config.hourHeight}px` }}
             className="relative"
           >
-            <span className="absolute -top-2.5 right-2 text-[11px] font-mono text-muted-foreground whitespace-nowrap">
+            <span
+              className={`absolute right-2 text-[11px] font-mono text-muted-foreground whitespace-nowrap ${
+                isFirst ? 'top-0.5' : '-top-2.5'
+              }`}
+            >
               {timeLabel}
             </span>
           </div>

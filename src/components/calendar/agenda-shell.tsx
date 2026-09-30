@@ -2,9 +2,6 @@
 
 /**
  * AgendaShell — top-level client component for the weekly agenda.
- *
- * Coordinates calendar state and semantic application commands
- * from AgendaProvider with presentation components and CRUD dialogs.
  */
 
 import React, { useMemo, useState } from 'react';

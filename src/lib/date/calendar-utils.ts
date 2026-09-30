@@ -1,8 +1,5 @@
 /**
  * Calendar presentation and calculation utilities.
- *
- * All functions here are pure business/presentation logic with no
- * React or DOM dependencies.
  */
 
 import { timeToMinutes } from './time-utils';
@@ -18,8 +15,8 @@ export type CalendarConfig = {
 };
 
 export const DEFAULT_CALENDAR_CONFIG: CalendarConfig = {
-  startHour: 7,
-  endHour: 22,
+  startHour: 0,
+  endHour: 23,
   hourHeight: 60, // 1px per minute
 } as const;
 

@@ -2,9 +2,6 @@
 
 /**
  * WeeklyGrid — 7-day calendar grid container.
- *
- * Implements sticky headers, sticky time axis, responsive horizontal scroll,
- * and distributes appointments into their respective day columns.
  */
 
 import React, { useMemo } from 'react';
@@ -70,7 +67,7 @@ export function WeeklyGrid({
           <div className="sticky top-0 z-30 flex border-b border-border bg-background/95 backdrop-blur shadow-xs">
             {/* Top-left corner aligned above time axis */}
             <div
-              className="w-14 sm:w-16 shrink-0 border-r border-border bg-background/95"
+              className="w-14 sm:w-16 shrink-0 border-r border-border bg-background/95 sticky left-0 z-40"
               aria-hidden="true"
             />
 
