@@ -16,6 +16,9 @@ type AppointmentCardProps = {
   readonly onSelect: (id: string) => void;
   readonly style?: React.CSSProperties;
   readonly height?: number;
+  readonly isDragging?: boolean;
+  readonly onStartDrag?: (e: React.PointerEvent, appointment: Appointment) => void;
+  readonly onStartResize?: (e: React.PointerEvent, appointment: Appointment) => void;
 };
 
 const STATUS_LABELS: Record<AppointmentStatus, string> = {
@@ -64,6 +67,9 @@ export function AppointmentCard({
   onSelect,
   style,
   height,
+  isDragging = false,
+  onStartDrag,
+  onStartResize,
 }: AppointmentCardProps) {
   const statusConfig = STATUS_STYLES[appointment.status];
   const statusLabel = STATUS_LABELS[appointment.status];
@@ -92,6 +98,19 @@ export function AppointmentCard({
     }
   };
 
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Only primary button
+    if (e.button !== 0) return;
+    // Don't drag if initiated from resize handle
+    const target = e.target as HTMLElement | null;
+    if (target?.closest('[data-testid^="resize-handle"]')) {
+      return;
+    }
+    if (onStartDrag) {
+      onStartDrag(e, appointment);
+    }
+  };
+
   return (
     <div
       role="button"
@@ -101,14 +120,19 @@ export function AppointmentCard({
       aria-label={`Compromisso: ${appointment.title}, ${appointment.startTime} às ${appointment.endTime}, ${appointment.professional}, status ${statusLabel}`}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      onPointerDown={handlePointerDown}
       style={style}
       className={cn(
-        'absolute rounded-md border text-xs text-left cursor-pointer select-none overflow-hidden transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        'absolute rounded-md border text-xs text-left select-none overflow-hidden transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         isCompact ? 'px-1.5 py-0.5' : isIntermediate ? 'px-1.5 py-1' : 'p-1.5',
         statusConfig.container,
-        isSelected
-          ? 'ring-2 ring-primary ring-offset-1 shadow-md z-20 font-medium'
-          : 'hover:shadow-sm z-10'
+        isDragging
+          ? 'ring-2 ring-primary shadow-2xl opacity-90 scale-[1.02] z-30 cursor-grabbing'
+          : isSelected
+          ? 'ring-2 ring-primary ring-offset-1 shadow-md z-20 font-medium cursor-grab'
+          : onStartDrag
+          ? 'hover:shadow-sm z-10 cursor-grab'
+          : 'hover:shadow-sm z-10 cursor-pointer'
       )}
     >
       {isCompact ? (
@@ -160,6 +184,23 @@ export function AppointmentCard({
             {appointment.professional}
           </div>
         </>
+      )}
+
+      {/* Resize Handle at the bottom edge */}
+      {onStartResize && (
+        <div
+          role="separator"
+          aria-orientation="horizontal"
+          aria-label={`Redimensionar compromisso ${appointment.title}`}
+          data-testid={`resize-handle-${appointment.id}`}
+          className="absolute bottom-0 inset-x-0 h-2 cursor-ns-resize hover:bg-black/15 dark:hover:bg-white/15 transition-colors z-20 flex items-center justify-center group"
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            onStartResize(e, appointment);
+          }}
+        >
+          <div className="w-4 h-0.5 rounded-full bg-foreground/25 group-hover:bg-foreground/50 transition-colors pointer-events-none" />
+        </div>
       )}
     </div>
   );

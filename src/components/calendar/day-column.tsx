@@ -19,6 +19,9 @@ type DayColumnProps = {
   readonly selectedAppointmentId: string | null;
   readonly onSelectAppointment: (id: string) => void;
   readonly config?: CalendarConfig;
+  readonly onStartDrag?: (e: React.PointerEvent, appointment: Appointment) => void;
+  readonly onStartResize?: (e: React.PointerEvent, appointment: Appointment) => void;
+  readonly draggingAppointmentId?: string | null;
 };
 
 export function DayColumn({
@@ -27,6 +30,9 @@ export function DayColumn({
   selectedAppointmentId,
   onSelectAppointment,
   config = DEFAULT_CALENDAR_CONFIG,
+  onStartDrag,
+  onStartResize,
+  draggingAppointmentId,
 }: DayColumnProps) {
   const positioned = layoutDayAppointments(appointments, config);
   const totalHours = config.endHour - config.startHour;
@@ -68,6 +74,7 @@ export function DayColumn({
       {/* Rendered appointment cards */}
       {positioned.map((item) => {
         const isSelected = item.appointment.id === selectedAppointmentId;
+        const isDragging = item.appointment.id === draggingAppointmentId;
         return (
           <AppointmentCard
             key={item.appointment.id}
@@ -75,6 +82,9 @@ export function DayColumn({
             isSelected={isSelected}
             onSelect={onSelectAppointment}
             height={item.placement.height}
+            isDragging={isDragging}
+            onStartDrag={onStartDrag}
+            onStartResize={onStartResize}
             style={{
               top: `${item.placement.top}px`,
               height: `${item.placement.height}px`,

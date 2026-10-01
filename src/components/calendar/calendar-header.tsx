@@ -9,6 +9,8 @@ import {
   Pencil,
   Trash2,
   X,
+  Undo2,
+  Redo2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { addWeeks, formatWeekRange } from '@/lib/date/calendar-utils';
@@ -23,6 +25,10 @@ type CalendarHeaderProps = {
   readonly onOpenCreate: () => void;
   readonly onOpenEdit?: () => void;
   readonly onOpenDelete?: () => void;
+  readonly canUndo?: boolean;
+  readonly canRedo?: boolean;
+  readonly onUndo?: () => void;
+  readonly onRedo?: () => void;
 };
 
 export function CalendarHeader({
@@ -33,6 +39,10 @@ export function CalendarHeader({
   onOpenCreate,
   onOpenEdit,
   onOpenDelete,
+  canUndo = false,
+  canRedo = false,
+  onUndo,
+  onRedo,
 }: CalendarHeaderProps) {
   const weekLabel = formatWeekRange(currentWeekStart);
 
@@ -96,6 +106,35 @@ export function CalendarHeader({
             >
               <span className="hidden sm:inline">Próxima</span>
               <ChevronRight className="size-4" />
+            </Button>
+          </div>
+
+          {/* History navigation (Undo / Redo) */}
+          <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onUndo}
+              disabled={!canUndo}
+              aria-label="Desfazer última alteração"
+              title={canUndo ? 'Desfazer ação anterior (Ctrl+Z)' : 'Nada para desfazer'}
+              className="gap-1 px-2.5"
+            >
+              <Undo2 className="size-4" />
+              <span className="hidden sm:inline">Desfazer</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRedo}
+              disabled={!canRedo}
+              aria-label="Refazer última alteração"
+              title={canRedo ? 'Refazer ação desfeita (Ctrl+Shift+Z)' : 'Nada para refazer'}
+              className="gap-1 px-2.5"
+            >
+              <Redo2 className="size-4" />
+              <span className="hidden sm:inline">Refazer</span>
             </Button>
           </div>
 

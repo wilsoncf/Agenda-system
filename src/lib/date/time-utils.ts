@@ -60,3 +60,48 @@ export function durationMinutes(startTime: string, endTime: string): number | nu
   if (start === null || end === null) return null;
   return end - start;
 }
+
+/**
+ * Formats a duration in minutes into a human-readable string in Portuguese.
+ * Examples: 15 -> "15 min", 60 -> "1 hora", 90 -> "1h 30min", 120 -> "2 horas"
+ */
+export function formatDuration(minutes: number): string {
+  if (minutes <= 0) return '0 min';
+
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+
+  if (hours === 0) {
+    return `${mins} min`;
+  }
+
+  if (mins === 0) {
+    return hours === 1 ? '1 hora' : `${hours} horas`;
+  }
+
+  return `${hours}h ${mins}min`;
+}
+
+/**
+ * Adds an offset in minutes to an `HH:mm` time string.
+ * Returns null if input time is invalid. Clamps result to [00:00, 23:59].
+ */
+export function addMinutesToTime(time: string, minutesToAdd: number): string | null {
+  const startMin = timeToMinutes(time);
+  if (startMin === null) return null;
+  const target = Math.max(0, Math.min(1439, startMin + minutesToAdd));
+  return minutesToTime(target);
+}
+
+/**
+ * Calculates a new end time given a start time and a duration in minutes.
+ * Returns null if start time is invalid or duration <= 0.
+ */
+export function calculateEndTime(startTime: string, durationMin: number): string | null {
+  if (durationMin <= 0) return null;
+  const startMin = timeToMinutes(startTime);
+  if (startMin === null) return null;
+  const target = Math.min(1439, startMin + durationMin);
+  return minutesToTime(target);
+}
+

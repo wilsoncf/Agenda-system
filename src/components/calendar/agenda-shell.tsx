@@ -10,6 +10,7 @@ import { CalendarHeader } from './calendar-header';
 import { WeeklyGrid } from './weekly-grid';
 import { AppointmentDialog } from '@/components/appointment/appointment-dialog';
 import { DeleteConfirmDialog } from '@/components/appointment/delete-confirm-dialog';
+import { useCalendarShortcuts } from '@/features/calendar';
 import type { Appointment, AppointmentDocument } from '@/domain/appointment';
 
 function AgendaContent() {
@@ -18,14 +19,25 @@ function AgendaContent() {
     createAppointment,
     updateAppointment,
     deleteAppointment,
+    moveAppointment,
+    resizeAppointment,
     selectAppointment,
     setWeek,
+    undoAction,
+    redoAction,
   } = useAgenda();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState<Appointment | null>(null);
+
+  // Keyboard shortcuts (Ctrl/Cmd + Z -> Undo, Ctrl/Cmd + Shift + Z / Ctrl+Y -> Redo)
+  useCalendarShortcuts({
+    onUndo: undoAction,
+    onRedo: redoAction,
+    enabled: !isCreateOpen && !isEditOpen && !isDeleteOpen,
+  });
 
   const selectedAppointment = useMemo(() => {
     if (!state.selectedAppointmentId) return undefined;
@@ -77,6 +89,14 @@ function AgendaContent() {
     setIsDeleteOpen(false);
   };
 
+  const handleMoveAppointment = (id: string, date: string, startTime?: string) => {
+    moveAppointment(id, date, startTime);
+  };
+
+  const handleResizeAppointment = (id: string, startTime: string, endTime: string) => {
+    resizeAppointment(id, startTime, endTime);
+  };
+
   return (
     <div className="flex flex-col h-screen w-full bg-background overflow-hidden">
       <CalendarHeader
@@ -87,6 +107,10 @@ function AgendaContent() {
         onOpenCreate={handleOpenCreate}
         onOpenEdit={handleOpenEdit}
         onOpenDelete={handleOpenDelete}
+        canUndo={state.canUndo}
+        canRedo={state.canRedo}
+        onUndo={undoAction}
+        onRedo={redoAction}
       />
 
       <WeeklyGrid
@@ -95,6 +119,8 @@ function AgendaContent() {
         selectedAppointmentId={state.selectedAppointmentId}
         onSelectAppointment={handleSelectAppointment}
         onClearSelection={handleClearSelection}
+        onMoveAppointment={handleMoveAppointment}
+        onResizeAppointment={handleResizeAppointment}
       />
 
       {/* Create Dialog */}
@@ -128,18 +154,27 @@ function AgendaContent() {
 export type AgendaShellProps = {
   readonly initialAppointments?: AppointmentDocument;
   readonly initialWeekStart?: string;
+  readonly enablePersistence?: boolean;
+  readonly storageKey?: string;
+  readonly storage?: Storage;
   readonly children?: React.ReactNode;
 };
 
 export function AgendaShell({
   initialAppointments,
   initialWeekStart,
+  enablePersistence,
+  storageKey,
+  storage,
   children,
 }: AgendaShellProps = {}) {
   return (
     <AgendaProvider
       initialAppointments={initialAppointments}
       initialWeekStart={initialWeekStart}
+      enablePersistence={enablePersistence}
+      storageKey={storageKey}
+      storage={storage}
     >
       {children}
       <AgendaContent />
