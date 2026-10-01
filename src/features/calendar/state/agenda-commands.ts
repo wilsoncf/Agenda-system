@@ -119,9 +119,13 @@ export function useAgendaCommands(
 
   const deleteAppointment = useCallback(
     (id: string) => {
+      const exists = state.history.present.some((a) => a.id === id);
+      if (!exists) {
+        return;
+      }
       dispatch({ type: 'DELETE_APPOINTMENT', payload: id });
     },
-    [dispatch]
+    [state.history.present, dispatch]
   );
 
   const selectAppointment = useCallback(

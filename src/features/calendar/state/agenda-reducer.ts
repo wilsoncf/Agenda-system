@@ -38,6 +38,16 @@ export function createInitialAgendaState(
   };
 }
 
+function warnInvalidAction(type: string, reason: string, details?: unknown): void {
+  if (process.env.NODE_ENV !== 'production') {
+    if (details !== undefined) {
+      console.warn(`[agendaReducer] Ignored ${type}: ${reason}`, details);
+    } else {
+      console.warn(`[agendaReducer] Ignored ${type}: ${reason}`);
+    }
+  }
+}
+
 /**
  * Pure state reducer for the Agenda.
  * Manages appointment document mutations, history transactions, and UI view state (week, selection).
@@ -47,9 +57,11 @@ export function agendaReducer(state: AgendaState, action: AgendaAction): AgendaS
     case 'CREATE_APPOINTMENT': {
       const validation = validateAppointment(action.payload);
       if (!validation.valid) {
+        warnInvalidAction('CREATE_APPOINTMENT', 'Validation failed', validation.errors);
         return state;
       }
       if (!isUniqueId(action.payload.id, state.history.present)) {
+        warnInvalidAction('CREATE_APPOINTMENT', `Duplicate appointment id "${action.payload.id}"`);
         return state;
       }
       const nextDoc = createAppointmentInDoc(state.history.present, action.payload);
@@ -67,10 +79,12 @@ export function agendaReducer(state: AgendaState, action: AgendaAction): AgendaS
     case 'UPDATE_APPOINTMENT': {
       const validation = validateAppointment(action.payload);
       if (!validation.valid) {
+        warnInvalidAction('UPDATE_APPOINTMENT', 'Validation failed', validation.errors);
         return state;
       }
       const exists = state.history.present.some((a) => a.id === action.payload.id);
       if (!exists) {
+        warnInvalidAction('UPDATE_APPOINTMENT', `Appointment "${action.payload.id}" does not exist`);
         return state;
       }
       const nextDoc = updateAppointmentInDoc(state.history.present, action.payload);
@@ -88,6 +102,7 @@ export function agendaReducer(state: AgendaState, action: AgendaAction): AgendaS
     case 'MOVE_APPOINTMENT': {
       const current = state.history.present.find((a) => a.id === action.payload.id);
       if (!current) {
+        warnInvalidAction('MOVE_APPOINTMENT', `Appointment "${action.payload.id}" does not exist`);
         return state;
       }
       const moved = moveAppointment(
@@ -97,6 +112,7 @@ export function agendaReducer(state: AgendaState, action: AgendaAction): AgendaS
       );
       const validation = validateAppointment(moved);
       if (!validation.valid) {
+        warnInvalidAction('MOVE_APPOINTMENT', 'Validation failed for moved appointment', validation.errors);
         return state;
       }
       const nextDoc = updateAppointmentInDoc(state.history.present, moved);
@@ -114,6 +130,7 @@ export function agendaReducer(state: AgendaState, action: AgendaAction): AgendaS
     case 'RESIZE_APPOINTMENT': {
       const current = state.history.present.find((a) => a.id === action.payload.id);
       if (!current) {
+        warnInvalidAction('RESIZE_APPOINTMENT', `Appointment "${action.payload.id}" does not exist`);
         return state;
       }
       const resized = rescheduleAppointment(
@@ -123,6 +140,7 @@ export function agendaReducer(state: AgendaState, action: AgendaAction): AgendaS
       );
       const validation = validateAppointment(resized);
       if (!validation.valid) {
+        warnInvalidAction('RESIZE_APPOINTMENT', 'Validation failed for resized appointment', validation.errors);
         return state;
       }
       const nextDoc = updateAppointmentInDoc(state.history.present, resized);
@@ -138,6 +156,11 @@ export function agendaReducer(state: AgendaState, action: AgendaAction): AgendaS
     }
 
     case 'DELETE_APPOINTMENT': {
+      const exists = state.history.present.some((a) => a.id === action.payload);
+      if (!exists) {
+        warnInvalidAction('DELETE_APPOINTMENT', `Appointment "${action.payload}" does not exist`);
+        return state;
+      }
       const nextDoc = deleteAppointmentFromDoc(state.history.present, action.payload);
       const nextHistory = commit(state.history, nextDoc, areAppointmentsEqual);
 
@@ -217,7 +240,13 @@ export function agendaReducer(state: AgendaState, action: AgendaAction): AgendaS
       };
     }
 
-    default:
+    default: {
+      const unknownAction = action as { type?: unknown };
+      warnInvalidAction(
+        typeof unknownAction?.type === 'string' ? unknownAction.type : 'UNKNOWN_ACTION',
+        'Unrecognized action type'
+      );
       return state;
+    }
   }
 }
