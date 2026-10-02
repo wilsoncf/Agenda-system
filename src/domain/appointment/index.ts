@@ -2,6 +2,10 @@
  * Public API for the appointment domain module.
  */
 
+export {
+  APPOINTMENT_STATUSES,
+  isAppointmentStatus,
+} from './types';
 export type {
   Appointment,
   AppointmentStatus,

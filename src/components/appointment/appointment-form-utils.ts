@@ -64,16 +64,21 @@ export function calculateAutoAdvancedEndTime(
 
 /**
  * Maps domain validation errors into field error messages,
- * ensuring Portuguese messages for time ordering.
  */
 export function mapValidationErrorsToFieldErrors(
   errors: ReadonlyArray<ValidationError>
 ): Record<string, string> {
   const errorMap: Record<string, string> = {};
   for (const err of errors) {
-    if (err.field === 'endTime' && err.message.includes('strictly later')) {
+    if (
+      err.field === 'endTime' &&
+      (err.message.includes('strictly later') || err.message.includes('posterior'))
+    ) {
       errorMap[err.field] = TIME_ORDER_ERROR_END;
-    } else if (err.field === 'startTime' && err.message.includes('strictly earlier')) {
+    } else if (
+      err.field === 'startTime' &&
+      (err.message.includes('strictly earlier') || err.message.includes('anterior'))
+    ) {
       errorMap[err.field] = TIME_ORDER_ERROR_START;
     } else {
       errorMap[err.field] = err.message;

@@ -1,9 +1,18 @@
+export const APPOINTMENT_STATUSES = [
+  'pending',
+  'confirmed',
+  'completed',
+  'cancelled',
+] as const;
 
-export type AppointmentStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'completed'
-  | 'cancelled';
+export type AppointmentStatus = (typeof APPOINTMENT_STATUSES)[number];
+
+export function isAppointmentStatus(value: unknown): value is AppointmentStatus {
+  return (
+    typeof value === 'string' &&
+    (APPOINTMENT_STATUSES as ReadonlyArray<string>).includes(value)
+  );
+}
 
 export type Appointment = {
   readonly id: string;

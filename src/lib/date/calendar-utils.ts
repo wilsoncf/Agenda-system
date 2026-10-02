@@ -20,6 +20,19 @@ export const DEFAULT_CALENDAR_CONFIG: CalendarConfig = {
   hourHeight: 60, // 1px per minute
 } as const;
 
+export function getCurrentMonday(): string {
+  const now = new Date();
+  const day = now.getDay();
+  // getDay() returns 0=Sun, 1=Mon, ..., 6=Sat
+  const diff = day === 0 ? -6 : 1 - day;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diff);
+  const year = monday.getFullYear();
+  const month = String(monday.getMonth() + 1).padStart(2, '0');
+  const date = String(monday.getDate()).padStart(2, '0');
+  return `${year}-${month}-${date}`;
+}
+
 export type DayOfWeekInfo = {
   readonly date: string; // YYYY-MM-DD
   readonly dayIndex: number; // 0 = Mon, ..., 6 = Sun
@@ -39,7 +52,7 @@ const DAY_NAMES = [
   'Domingo',
 ];
 
-const SHORT_DAY_NAMES = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+const SHORT_DAY_NAMES = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom' ];
 
 const MONTH_NAMES = [
   'janeiro',

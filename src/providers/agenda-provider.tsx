@@ -11,21 +11,21 @@ import React, {
   useMemo,
   type ReactNode,
 } from 'react';
-import type { Appointment, AppointmentDocument } from '@/domain/appointment';
-import { SEED_APPOINTMENTS } from '@/domain/appointment';
+import type { AppointmentDocument } from '@/domain/appointment';
 import { APPOINTMENTS_STORAGE_KEY } from '@/lib/storage/appointment-storage';
 import {
   agendaReducer,
   createInitialAgendaState,
   useAgendaCommands,
   useAgendaPersistence,
-} from '@/features/calendar/state';
+} from '@/features/calendar/model';
 import type {
   AgendaState,
   AgendaAction,
   CommandResult,
   AgendaContextValue,
-} from '@/features/calendar/state';
+} from '@/features/calendar/model';
+import { getCurrentMonday } from '@/lib/date/calendar-utils';
 
 // Re-export state and action types for backwards compatibility
 export type {
@@ -51,22 +51,9 @@ export type AgendaProviderProps = {
   readonly storage?: Storage;
 };
 
-export function getCurrentMonday(): string {
-  const now = new Date();
-  const day = now.getDay();
-  // getDay() returns 0=Sun, 1=Mon, ..., 6=Sat
-  const diff = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diff);
-  const year = monday.getFullYear();
-  const month = String(monday.getMonth() + 1).padStart(2, '0');
-  const date = String(monday.getDate()).padStart(2, '0');
-  return `${year}-${month}-${date}`;
-}
-
 export function AgendaProvider({
   children,
-  initialAppointments = SEED_APPOINTMENTS as Appointment[],
+  initialAppointments = [],
   initialWeekStart,
   enablePersistence,
   storageKey = APPOINTMENTS_STORAGE_KEY,
@@ -76,14 +63,13 @@ export function AgendaProvider({
     agendaReducer,
     initialAppointments,
     (initialList): AgendaState =>
-      createInitialAgendaState(initialList, initialWeekStart)
+      createInitialAgendaState(initialList, initialWeekStart ?? getCurrentMonday())
   );
 
   // Storage hydration & debounced persistence
   useAgendaPersistence({
     appointments: state.appointments,
     dispatch,
-    initialAppointments,
     enablePersistence,
     storageKey,
     storage,

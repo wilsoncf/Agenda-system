@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import type { Appointment, AppointmentStatus, ValidationError } from '@/domain/appointment';
-import { validateAppointment } from '@/domain/appointment';
+import { isAppointmentStatus, validateAppointment } from '@/domain/appointment';
 import {
   isValidTime,
   timeToMinutes,
@@ -36,7 +36,7 @@ import { AppointmentTimeFields } from './appointment-time-fields';
 
 export type AppointmentFormProps = {
   readonly appointmentToEdit?: Appointment | null;
-  readonly defaultDate: string;
+  readonly defaultDate?: string;
   readonly onSave: (
     appointment: Appointment
   ) => { success: boolean; errors?: ReadonlyArray<ValidationError> };
@@ -55,7 +55,9 @@ export function AppointmentForm({
   const [professional, setProfessional] = useState(
     appointmentToEdit?.professional ?? ''
   );
-  const [date, setDate] = useState(appointmentToEdit?.date ?? defaultDate);
+  const [date, setDate] = useState(
+    appointmentToEdit?.date ?? defaultDate ?? ''
+  );
   const [startTime, setStartTime] = useState(
     appointmentToEdit?.startTime ?? DEFAULT_START_TIME
   );
@@ -109,6 +111,13 @@ export function AppointmentForm({
         setEndTime(newEnd);
         clearTimeErrors();
       }
+    }
+  };
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (isAppointmentStatus(value)) {
+      setStatus(value);
     }
   };
 
@@ -291,7 +300,7 @@ export function AppointmentForm({
             id="appointment-status"
             name="status"
             value={status}
-            onChange={(e) => setStatus(e.target.value as AppointmentStatus)}
+            onChange={handleStatusChange}
             className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <option value="confirmed" className="bg-popover text-popover-foreground">

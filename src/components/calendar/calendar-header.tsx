@@ -54,10 +54,6 @@ export function CalendarHeader({
     onWeekChange(addWeeks(currentWeekStart, 1));
   };
 
-  const handleJumpToFixture = () => {
-    onWeekChange(FIXTURE_WEEK_START);
-  };
-
   return (
     <header className="border-b border-border bg-card p-4 sm:px-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -87,15 +83,6 @@ export function CalendarHeader({
             >
               <ChevronLeft className="size-4" />
               <span className="hidden sm:inline">Anterior</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleJumpToFixture}
-              aria-label="Ir para semana de demonstração"
-            >
-              Semana Demo
             </Button>
 
             <Button

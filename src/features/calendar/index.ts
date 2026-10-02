@@ -8,4 +8,4 @@ export type {
   UseCalendarShortcutsOptions,
 } from './use-calendar-shortcuts';
 
-export * from './state';
+export * from './model';

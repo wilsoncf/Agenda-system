@@ -1,6 +1,5 @@
 import { useEffect, useRef, type Dispatch } from 'react';
 import type { AppointmentDocument } from '@/domain/appointment';
-import { SEED_APPOINTMENTS } from '@/domain/appointment';
 import {
   APPOINTMENTS_STORAGE_KEY,
   loadFromStorage,
@@ -11,7 +10,6 @@ import type { AgendaAction } from './agenda-actions';
 export type AgendaPersistenceOptions = {
   readonly appointments: AppointmentDocument;
   readonly dispatch: Dispatch<AgendaAction>;
-  readonly initialAppointments?: AppointmentDocument;
   readonly enablePersistence?: boolean;
   readonly storageKey?: string;
   readonly storage?: Storage;
@@ -24,7 +22,6 @@ export type AgendaPersistenceOptions = {
 export function useAgendaPersistence({
   appointments,
   dispatch,
-  initialAppointments = SEED_APPOINTMENTS as AppointmentDocument,
   enablePersistence,
   storageKey = APPOINTMENTS_STORAGE_KEY,
   storage,
@@ -33,22 +30,21 @@ export function useAgendaPersistence({
     enablePersistence ??
     (typeof window !== 'undefined' &&
       typeof process !== 'undefined' &&
-      process.env.NODE_ENV !== 'test' &&
-      initialAppointments === SEED_APPOINTMENTS);
+      process.env.NODE_ENV !== 'test');
 
   const hasHydratedRef = useRef(false);
 
-  // 1. Initial hydration from storage on client mount
+  // Initial hydration from storage on client mount
   useEffect(() => {
     if (!shouldPersist) return;
     const loaded = loadFromStorage(storageKey, storage);
-    if (loaded && loaded.length > 0) {
+    if (loaded !== null) {
       dispatch({ type: 'HYDRATE_APPOINTMENTS', payload: loaded });
     }
     hasHydratedRef.current = true;
   }, [shouldPersist, storageKey, storage, dispatch]);
 
-  // 2. Debounced persistence on appointments change
+  // Debounced persistence on appointments change
   useEffect(() => {
     if (!shouldPersist) return;
     if (!hasHydratedRef.current) return;

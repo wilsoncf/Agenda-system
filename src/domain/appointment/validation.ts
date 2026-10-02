@@ -3,6 +3,7 @@
  */
 
 import type { Appointment } from './types';
+import { isAppointmentStatus } from './types';
 import { isValidDate, isValidTime, timeToMinutes } from '@/lib/date/time-utils';
 
 /** Individual validation error for an appointment field. */
@@ -23,27 +24,31 @@ export function validateAppointment(appointment: Appointment): ValidationResult 
   const errors: ValidationError[] = [];
 
   if (!appointment.id || appointment.id.trim().length === 0) {
-    errors.push({ field: 'id', message: 'ID must not be empty' });
+    errors.push({ field: 'id', message: 'ID não pode ser vazio' });
   }
 
   if (!appointment.title || appointment.title.trim().length === 0) {
-    errors.push({ field: 'title', message: 'Title must not be blank' });
+    errors.push({ field: 'title', message: 'Título não pode ficar em branco' });
   }
 
   if (!appointment.professional || appointment.professional.trim().length === 0) {
-    errors.push({ field: 'professional', message: 'Professional must not be blank' });
+    errors.push({ field: 'professional', message: 'Profissional não pode ficar em branco' });
   }
 
   if (!isValidDate(appointment.date)) {
-    errors.push({ field: 'date', message: 'Date must be a valid YYYY-MM-DD string' });
+    errors.push({ field: 'date', message: 'Data deve ser válida no formato AAAA-MM-DD' });
   }
 
   if (!isValidTime(appointment.startTime)) {
-    errors.push({ field: 'startTime', message: 'Start time must be a valid HH:mm string' });
+    errors.push({ field: 'startTime', message: 'Horário de início deve ser válido no formato HH:mm' });
   }
 
   if (!isValidTime(appointment.endTime)) {
-    errors.push({ field: 'endTime', message: 'End time must be a valid HH:mm string' });
+    errors.push({ field: 'endTime', message: 'Horário de término deve ser válido no formato HH:mm' });
+  }
+
+  if (!isAppointmentStatus(appointment.status)) {
+    errors.push({ field: 'status', message: 'Status inválido' });
   }
 
   // Only check time ordering if both times are individually valid
@@ -53,11 +58,11 @@ export function validateAppointment(appointment: Appointment): ValidationResult 
     if (startMinutes !== null && endMinutes !== null && endMinutes <= startMinutes) {
       errors.push({
         field: 'endTime',
-        message: 'End time must be strictly later than start time',
+        message: 'O horário de término deve ser posterior ao horário de início.',
       });
       errors.push({
         field: 'startTime',
-        message: 'Start time must be strictly earlier than end time',
+        message: 'O horário de início deve ser anterior ao horário de término.',
       });
     }
   }

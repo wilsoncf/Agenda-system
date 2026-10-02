@@ -1,6 +1,5 @@
 import type { AppointmentDocument } from '@/domain/appointment';
 import {
-  FIXTURE_WEEK_START,
   validateAppointment,
   isUniqueId,
   createAppointmentInDoc,
@@ -18,6 +17,7 @@ import {
   canUndo,
   canRedo,
 } from '@/domain/history';
+import {getCurrentMonday} from '@/lib/date/calendar-utils';
 import type { AgendaState, AgendaAction } from './agenda-actions';
 
 /**
@@ -32,7 +32,7 @@ export function createInitialAgendaState(
     history,
     appointments: history.present,
     selectedAppointmentId: null,
-    currentWeekStart: initialWeekStart ?? FIXTURE_WEEK_START,
+    currentWeekStart: initialWeekStart ?? getCurrentMonday(),
     canUndo: canUndo(history),
     canRedo: canRedo(history),
   };

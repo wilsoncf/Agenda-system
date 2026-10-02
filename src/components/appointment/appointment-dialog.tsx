@@ -23,9 +23,11 @@ export function AppointmentDialog({
   open,
   onOpenChange,
   appointmentToEdit,
-  defaultDate = '2024-01-15',
+  defaultDate,
   onSave,
 }: AppointmentDialogProps) {
+  const effectiveDefaultDate = defaultDate ?? appointmentToEdit?.date ?? '';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -33,7 +35,7 @@ export function AppointmentDialog({
           <AppointmentForm
             key={appointmentToEdit ? appointmentToEdit.id : 'new-appointment'}
             appointmentToEdit={appointmentToEdit}
-            defaultDate={defaultDate}
+            defaultDate={effectiveDefaultDate}
             onSave={onSave}
             onCancel={() => onOpenChange(false)}
           />
