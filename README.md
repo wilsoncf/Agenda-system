@@ -58,6 +58,11 @@ npm run dev
 
 Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
 
+### Testes
+```bash
+npm run test
+```
+
 ### Build de Produção
 
 ```bash
