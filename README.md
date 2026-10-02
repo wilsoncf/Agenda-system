@@ -2,6 +2,8 @@
 
 Aplicação web responsiva de agenda semanal para gerenciamento de compromissos com suporte completo a histórico de operações (**Desfazer / Refazer**).
 
+Uma demo foi disponibilizada em : https://agenda-wilson.duckdns.org
+
 ---
 
 ## Sumário
