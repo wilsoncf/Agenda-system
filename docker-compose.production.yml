@@ -1,0 +1,24 @@
+services:
+  agenda-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agenda-web
+    restart: unless-stopped
+
+    networks:
+      - web
+
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.agenda.rule=Host(`agenda-wilson.duckdns.org`)
+      - traefik.http.routers.agenda.entrypoints=websecure
+      - traefik.http.routers.agenda.tls=true
+      - traefik.http.routers.agenda.tls.certresolver=le
+
+      - traefik.http.services.agenda.loadbalancer.server.port=3000
+
+networks:
+  web:
+    external: true
